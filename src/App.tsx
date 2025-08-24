@@ -1,13 +1,89 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 
 function App() {
   const [count, setCount] = useState(0);
+  const [isRepeating, setIsRepeating] = useState<
+    "increment" | "decrement" | null
+  >(null);
+
+  // Refs for managing intervals and timeouts
+  const intervalRef = useRef<number | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   // Counter functions with bounds checking
-  const increment = () => setCount(count + 1);
-  const decrement = () => setCount(Math.max(0, count - 1));
+  const increment = () => setCount((prev) => prev + 1);
+  const decrement = () => setCount((prev) => Math.max(0, prev - 1));
+
+  // Auto-repeat functionality
+  const startAutoRepeat = (action: "increment" | "decrement") => {
+    setIsRepeating(action);
+
+    // Initial delay before starting repeat (500ms)
+    timeoutRef.current = setTimeout(() => {
+      // Start repeating interval (every 100ms)
+      intervalRef.current = setInterval(() => {
+        if (action === "increment") {
+          setCount((prev) => prev + 1);
+        } else if (action === "decrement") {
+          setCount((prev) => Math.max(0, prev - 1));
+        }
+      }, 100);
+    }, 500);
+  };
+
+  const stopAutoRepeat = () => {
+    setIsRepeating(null);
+
+    // Clear timeout and interval
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  // Mouse event handlers
+  const handleMouseDown = (action: "increment" | "decrement") => {
+    // Perform single action first
+    if (action === "increment") {
+      increment();
+    } else {
+      decrement();
+    }
+
+    // Start auto-repeat
+    startAutoRepeat(action);
+  };
+
+  const handleMouseUp = () => {
+    stopAutoRepeat();
+  };
+
+  const handleMouseLeave = () => {
+    stopAutoRepeat();
+  };
+
+  // Touch event handlers for mobile support
+  const handleTouchStart = (action: "increment" | "decrement") => {
+    // Prevent default to avoid mouse events firing on mobile
+    handleMouseDown(action);
+  };
+
+  const handleTouchEnd = () => {
+    stopAutoRepeat();
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopAutoRepeat();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12">
@@ -44,8 +120,17 @@ function App() {
           <div className="flex items-center justify-center space-x-4 mb-6">
             <button
               onClick={decrement}
+              onMouseDown={() => handleMouseDown("decrement")}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
+              onTouchStart={() => handleTouchStart("decrement")}
+              onTouchEnd={handleTouchEnd}
               disabled={count === 0}
-              className="bg-red-500 hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors min-w-[80px]"
+              className={`bg-red-500 hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-all duration-150 min-w-[80px] ${
+                isRepeating === "decrement"
+                  ? "scale-95 bg-red-700 shadow-inner"
+                  : ""
+              }`}
             >
               -1
             </button>
@@ -56,7 +141,16 @@ function App() {
 
             <button
               onClick={increment}
-              className="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors min-w-[80px]"
+              onMouseDown={() => handleMouseDown("increment")}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
+              onTouchStart={() => handleTouchStart("increment")}
+              onTouchEnd={handleTouchEnd}
+              className={`bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-150 min-w-[80px] ${
+                isRepeating === "increment"
+                  ? "scale-95 bg-green-700 shadow-inner"
+                  : ""
+              }`}
             >
               +1
             </button>

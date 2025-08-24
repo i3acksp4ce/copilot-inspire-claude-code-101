@@ -50,6 +50,26 @@ This document serves as the master index for all project contexts. Each context 
 
 ---
 
+### 3. Auto-repeat Counter Feature Context
+**File:** [`auto-repeat-feature.md`](./contexts/auto-repeat-feature.md)  
+**Date:** August 24, 2025  
+**Status:** ✅ Completed
+
+**What's Documented:**
+- Hold-to-repeat functionality implementation
+- Cross-platform mouse and touch event handling
+- Auto-repeat timing and performance optimization
+- Visual feedback and animation enhancements
+- Memory management and cleanup strategies
+
+**Key Features:**
+- Hold button for auto-repeat (500ms delay, 100ms intervals)
+- Cross-platform support (desktop mouse + mobile touch)
+- Visual feedback during hold state
+- Performance optimized with proper cleanup
+
+---
+
 ## 🗂️ Context Organization Structure
 
 ```
